@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gráfica pusher cultivos</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+    <script src="https://js.pusher.com/8.0.1/pusher.min.js"></script>
+</head>
+<body>
+<canvas id="myChart" style="width:100%;max-width:600px"></canvas>
+<script>
+
+    const xValues = ["Frutas tropicales", "Hortalizas", "Cítricos", "Trigo", "Olivo"];
+    const yValues = [55, 49, 44, 24, 15];
+    const barColors = [
+        "#b91d47",
+        "#00aba9",
+        "#2b5797",
+        "#e8c3b9",
+        "#1e7145"
+    ];
+
+    const myChart = new Chart("myChart", {
+        type: "doughnut",
+        data: {
+            labels: xValues,
+            datasets: [{
+                backgroundColor: barColors,
+                data: yValues
+            }]
+        },
+        options: {
+            title: {
+                display: true,
+                text: "Tipos de cultivos en Andalucía años 2015-2024"
+            }
+        }
+    });
+
+    const pusher = new Pusher(
+        "xxxxxxxxxxxxxxxxxxxx", // Replace with 'key' from dashboard
+        {
+            cluster: "eu", // Replace with 'cluster' from dashboard
+            forceTLS: true,
+        }
+    );
+
+    const channel = pusher.subscribe("segment");
+    channel.bind("new-segment", (data) => {
+        for(let i = 0; i < data.length; i++) {
+            myChart.data.datasets[0].data[i] += data[i];
+        }
+        myChart.update();
+    });
+</script>
+</body>
+</html>
